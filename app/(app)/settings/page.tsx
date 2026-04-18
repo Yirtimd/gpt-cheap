@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BillingSection } from "@/components/billing-section";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -11,7 +12,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, monthly_cost_cents_used, billing_period_start")
+    .select("plan, stripe_customer_id, monthly_cost_cents_used, billing_period_start")
     .eq("id", user.id)
     .single();
 
@@ -40,18 +41,10 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing</CardTitle>
-            <CardDescription>Manage your subscription</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Stripe integration coming soon. You are currently on the{" "}
-              <span className="capitalize font-medium">{profile?.plan ?? "starter"}</span> plan.
-            </p>
-          </CardContent>
-        </Card>
+        <BillingSection
+          currentPlan={profile?.plan ?? "starter"}
+          hasStripeCustomer={!!profile?.stripe_customer_id}
+        />
       </div>
     </div>
   );

@@ -174,11 +174,12 @@ export default function OnboardingPage() {
                 {queries.filter((q) => q.trim().length > 0).length} configured
               </div>
               <div>
-                <span className="font-medium">Plan:</span> Starter ($9/mo)
+                <span className="font-medium">Plan:</span> Starter ($9/mo) — you can upgrade in
+                Settings after setup.
               </div>
               <p className="text-xs text-muted-foreground">
-                Your first monitoring run will start within 24 hours. You can manage queries and
-                billing in Settings.
+                Your first monitoring run will start within 24 hours. Billing will be activated once
+                Stripe is connected.
               </p>
             </div>
           )}

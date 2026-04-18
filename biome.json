@@ -25,6 +25,9 @@
       "style": {
         "useConst": "error",
         "useImportType": "error"
+      },
+      "a11y": {
+        "noLabelWithoutControl": "off"
       }
     }
   },

@@ -12,6 +12,24 @@ export type Citation = {
 
 export type Database = {
   public: {
+    Views: Record<string, never>;
+    CompositeTypes: Record<string, never>;
+    Enums: {
+      plan_tier: Plan;
+      run_status: RunStatus;
+      llm_provider: Provider;
+      sentiment: Sentiment;
+      recommendation_strength: RecommendationStrength;
+    };
+    Functions: {
+      increment_monthly_cost: {
+        Args: {
+          p_user_id: string;
+          p_delta_cents: number;
+        };
+        Returns: undefined;
+      };
+    };
     Tables: {
       profiles: {
         Row: {
@@ -31,6 +49,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
       };
       brands: {
         Row: {
@@ -50,6 +69,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["brands"]["Insert"]>;
+        Relationships: [];
       };
       queries: {
         Row: {
@@ -67,6 +87,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["queries"]["Insert"]>;
+        Relationships: [];
       };
       runs: {
         Row: {
@@ -88,6 +109,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["runs"]["Insert"]>;
+        Relationships: [];
       };
       results: {
         Row: {
@@ -127,6 +149,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["results"]["Insert"]>;
+        Relationships: [];
       };
       alerts: {
         Row: {
@@ -148,6 +171,7 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["alerts"]["Insert"]>;
+        Relationships: [];
       };
     };
   };

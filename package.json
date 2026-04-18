@@ -11,13 +11,17 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:integration": "RUN_INTEGRATION=1 vitest run",
     "inngest:dev": "inngest-cli dev -u http://localhost:3000/api/inngest"
   },
   "dependencies": {
+    "@google/genai": "^1.50.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.103.2",
     "inngest": "^4.2.4",
     "next": "16.2.4",
+    "openai": "^6.34.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "^4.3.6"
@@ -28,10 +32,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "inngest-cli": "^1.17.9",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^4.1.4"
   }
 }

@@ -23,6 +23,9 @@ const serverSchema = z.object({
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
 
   MAX_GLOBAL_COST_CENTS_PER_DAY: z.coerce.number().int().positive().default(10000),
+
+  // Flip to "1" when past Gemini's 500/day grounded-request free tier.
+  GEMINI_GROUNDING_BILLED: z.coerce.boolean().default(false),
 });
 
 const clientSchema = serverSchema.pick({

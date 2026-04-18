@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,7 @@ const STEPS = ["Brand Info", "Queries", "Finish"] as const;
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const posthog = usePostHog();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,10 @@ export default function OnboardingPage() {
       );
 
       if (queryError) throw new Error(queryError.message);
+
+      posthog?.identify(user.id, { email: user.email });
+      posthog?.capture("brand_created", { brandName: brandName.trim() });
+      posthog?.capture("queries_created", { count: activeQueries.length });
 
       router.push("/dashboard");
       router.refresh();

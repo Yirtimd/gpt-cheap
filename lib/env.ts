@@ -19,8 +19,13 @@ const serverSchema = z.object({
   RESEND_API_KEY: z.string().min(1).optional(),
 
   SENTRY_DSN: z.string().url().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+  POSTHOG_API_KEY: z.string().min(1).optional(),
+
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
 
   MAX_GLOBAL_COST_CENTS_PER_DAY: z.coerce.number().int().positive().default(10000),
 
@@ -33,6 +38,7 @@ const clientSchema = serverSchema.pick({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: true,
   NEXT_PUBLIC_POSTHOG_KEY: true,
   NEXT_PUBLIC_POSTHOG_HOST: true,
+  NEXT_PUBLIC_SENTRY_DSN: true,
 });
 
 const isServer = typeof window === "undefined";
@@ -44,6 +50,7 @@ const parsed = isServer
       NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
       NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     });
 
 if (!parsed.success) {

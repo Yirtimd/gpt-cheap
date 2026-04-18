@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { env } from "@/lib/env";
+import { captureServerEvent } from "@/lib/posthog-server";
 import { getStripeClient } from "@/lib/stripe/client";
 import { planFromPriceId } from "@/lib/stripe/config";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -55,6 +56,12 @@ export async function POST(request: Request) {
             monthly_cost_cents_used: 0,
           })
           .eq("id", userId);
+
+        await captureServerEvent({
+          distinctId: userId,
+          event: "checkout_completed",
+          properties: { plan, customerId },
+        });
       }
       break;
     }

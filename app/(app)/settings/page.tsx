@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { BillingSection } from "@/components/billing-section";
+import { BrandEditor } from "@/components/brand-editor";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
@@ -12,9 +14,25 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, stripe_customer_id, monthly_cost_cents_used, billing_period_start")
+    .select("plan, stripe_customer_id, monthly_cost_cents_used")
     .eq("id", user.id)
     .single();
+
+  const { data: brands } = await supabase
+    .from("brands")
+    .select("id, name, domain, description")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  const brand = brands?.[0];
+
+  const { data: queries } = brand
+    ? await supabase
+        .from("queries")
+        .select("id, prompt_text, is_active")
+        .eq("brand_id", brand.id)
+        .order("created_at", { ascending: true })
+    : { data: null };
 
   return (
     <div>
@@ -40,6 +58,15 @@ export default async function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {brand && (
+          <>
+            <Separator />
+            <BrandEditor brand={brand} queries={queries ?? []} />
+          </>
+        )}
+
+        <Separator />
 
         <BillingSection
           currentPlan={profile?.plan ?? "starter"}

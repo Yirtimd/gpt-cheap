@@ -1,9 +1,13 @@
+import { ArrowRight, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DashboardPreview } from "@/components/marketing/dashboard-preview";
+import { FaqAccordion } from "@/components/marketing/faq-accordion";
+import { FeaturesGrid } from "@/components/marketing/features-grid";
+import { HowItWorks } from "@/components/marketing/how-it-works";
+import { PricingCards } from "@/components/marketing/pricing-cards";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PLAN_PRODUCTS } from "@/lib/stripe/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -16,29 +20,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-const FAQ_ITEMS = [
-  {
-    q: "How is this different from Profound, Peec, or AthenaHQ?",
-    a: "Those tools target enterprise with $500+/mo pricing. We serve the long tail — freelancers, solo founders, and SMBs who need AEO monitoring without an enterprise budget.",
-  },
-  {
-    q: "Which AI providers do you monitor?",
-    a: "OpenAI (ChatGPT via Responses API) and Google Gemini, both with web search enabled. Claude and Perplexity are on the roadmap.",
-  },
-  {
-    q: "How accurate is the mention detection?",
-    a: "We use a separate LLM-based judge with structured output for every response, with 1x–3x replication depending on your plan. Majority voting reduces false positives vs regex matching.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes, monthly billing, cancel or downgrade anytime via the customer portal.",
-  },
-  {
-    q: "How often are runs executed?",
-    a: "Starter: weekly. Growth & Pro: daily. Each run tests all your queries across both providers.",
-  },
-];
 
 const JSON_LD = {
   "@context": "https://schema.org",
@@ -71,160 +52,171 @@ export default async function LandingPage() {
       />
 
       {/* HERO */}
-      <section className="mx-auto max-w-3xl px-4 py-24 text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Know when ChatGPT recommends your brand.
-        </h1>
-        <p className="mt-5 text-lg text-muted-foreground">
-          Weekly AEO monitoring for freelancers, solo founders, and SMBs. From $9/month.
-        </p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Link href="/login" className={buttonVariants({ size: "lg" })}>
-            Start monitoring
-          </Link>
-          <Link href="#pricing" className={buttonVariants({ size: "lg", variant: "outline" })}>
-            See pricing
-          </Link>
-        </div>
-        <p className="mt-4 text-xs text-muted-foreground">
-          No free tier · Monthly billing · Cancel anytime
-        </p>
-      </section>
+      <section className="relative overflow-hidden pt-20 pb-20 sm:pt-28 sm:pb-24">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-dot-grid-faint opacity-40 mask-radial-fade"
+        />
+        <div
+          aria-hidden
+          className="absolute top-0 left-1/2 -z-10 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-brand/20 blur-[100px]"
+        />
 
-      {/* PROBLEM */}
-      <section className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-3xl px-4">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Your customers are asking ChatGPT, not Google.
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            58% of buyers now ask AI assistants for product recommendations. If ChatGPT or Gemini
-            doesn't mention you, you lose deals you never even knew existed.
-          </p>
-          <p className="mt-4 text-muted-foreground">
-            Enterprise AEO tools cost $500+/month — that doesn't work for a 5-person team. We run
-            the same playbook on a $9 budget: weekly queries, real web search, sentiment tracking,
-            competitor analysis.
-          </p>
-        </div>
-      </section>
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3.5 py-1.5 text-xs font-medium text-brand">
+              <Sparkles className="h-3.5 w-3.5" />
+              AEO monitoring from $9/month
+            </div>
 
-      {/* DEMO placeholder */}
-      <section className="border-t py-20">
-        <div className="mx-auto max-w-3xl px-4">
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight">What you get</h2>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Mention rate</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Track how often ChatGPT and Gemini name your brand across your queries, with
-                  weekly delta alerts.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Sentiment & position</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Every mention is analyzed for tone (positive / neutral / negative) and position in
-                  lists.
-                </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Competitor radar</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  See which competitors get mentioned alongside you and how frequently.
-                </p>
-              </CardContent>
-            </Card>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+              Know when ChatGPT
+              <br />
+              <span className="bg-gradient-to-r from-brand to-brand/70 bg-clip-text text-transparent">
+                recommends your brand.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+              Weekly reports on how ChatGPT and Gemini answer when someone asks about your market.
+              Built for solo founders, freelancers, and small teams.
+            </p>
+
+            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link
+                href="/login"
+                className={buttonVariants({ size: "lg", className: "gap-2 px-6" })}
+              >
+                Start monitoring
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="#pricing"
+                className={buttonVariants({ size: "lg", variant: "outline", className: "px-6" })}
+              >
+                See pricing
+              </Link>
+            </div>
+
+            <p className="mt-5 text-xs text-muted-foreground">
+              No free tier · Monthly billing · Cancel anytime
+            </p>
           </div>
+
+          <div className="mx-auto mt-20 max-w-4xl">
+            <DashboardPreview />
+          </div>
+        </div>
+      </section>
+
+      {/* STATS BAND */}
+      <section className="border-y bg-muted/30">
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-4">
+          <Stat value="79%" label="net margin on Starter" />
+          <Stat value="2¢" label="per provider call" />
+          <Stat value="2" label="AI providers out of the box" />
+          <Stat value="~14m" label="avg run duration" />
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section id="features" className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-14 max-w-2xl">
+            <div className="mb-4 text-sm font-medium text-brand">Features</div>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Built for the long tail of AEO
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Enterprise tools solve the same problem at 50× the price. We cut everything that is
+              not essential to keep pricing at SMB budget.
+            </p>
+          </div>
+          <FeaturesGrid />
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section className="border-t bg-muted/30 py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-14 max-w-2xl">
+            <div className="mb-4 text-sm font-medium text-brand">How it works</div>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              From signup to first report in 24 hours
+            </h2>
+          </div>
+          <HowItWorks />
         </div>
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-5xl px-4">
-          <h2 className="text-center text-2xl font-semibold tracking-tight">
-            Simple, transparent pricing
-          </h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            No free tier. Monthly billing. No lock-in.
-          </p>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            {(["starter", "growth", "pro"] as const).map((tier) => {
-              const product = PLAN_PRODUCTS[tier];
-              return (
-                <Card key={tier}>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>{product.name}</span>
-                      <span className="text-2xl font-bold">
-                        ${(product.priceCents / 100).toFixed(0)}
-                      </span>
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">/month</p>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="grid gap-2 text-sm">
-                      {product.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2">
-                          <span className="mt-0.5 text-primary">+</span>
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Link href="/login" className={buttonVariants({ className: "w-full" })}>
-                      Start with {product.name}
-                    </Link>
-                  </CardFooter>
-                </Card>
-              );
-            })}
+      <section id="pricing" className="py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-14 text-center">
+            <div className="mb-4 text-sm font-medium text-brand">Pricing</div>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              Simple plans, no surprises
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+              Monthly billing. No annual lock-in. No hidden per-seat fees.
+            </p>
           </div>
+          <PricingCards />
         </div>
       </section>
 
       {/* FAQ */}
-      <section className="border-t py-20">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="mb-8 text-2xl font-semibold tracking-tight">Frequently asked</h2>
-          <div className="space-y-6">
-            {FAQ_ITEMS.map((item) => (
-              <div key={item.q}>
-                <h3 className="font-medium">{item.q}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{item.a}</p>
-              </div>
-            ))}
+      <section id="faq" className="border-t bg-muted/30 py-24">
+        <div className="mx-auto max-w-2xl px-6">
+          <div className="mb-12 text-center">
+            <div className="mb-4 text-sm font-medium text-brand">FAQ</div>
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Questions, answered</h2>
           </div>
+          <FaqAccordion />
         </div>
       </section>
 
       {/* CTA */}
-      <section className="border-t bg-muted/30 py-20">
-        <div className="mx-auto max-w-2xl px-4 text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Ready to see where your brand stands?
+      <section className="relative overflow-hidden border-t py-24">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-soft via-background to-background"
+        />
+        <div
+          aria-hidden
+          className="absolute -bottom-20 left-1/2 -z-10 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-brand/20 blur-[80px]"
+        />
+
+        <div className="mx-auto max-w-2xl px-6 text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            See where your brand stands in AI answers
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            5 queries. 2 providers. Weekly reports. $9/month.
+          <p className="mx-auto mt-4 max-w-md text-muted-foreground">
+            First report in 24 hours. $9/month. Cancel anytime.
           </p>
-          <Link href="/login" className={buttonVariants({ size: "lg", className: "mt-6" })}>
+          <Link
+            href="/login"
+            className={buttonVariants({
+              size: "lg",
+              className: "mt-8 gap-2 px-8",
+            })}
+          >
             Get started
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
     </>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
+        {value}
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
+    </div>
   );
 }

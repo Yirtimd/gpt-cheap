@@ -46,7 +46,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
       <footer className="border-t bg-muted/20">
         <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="grid gap-10 lg:grid-cols-4">
+          <div className="grid gap-10 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <Link href="/" className="flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand/70 text-[11px] font-bold text-brand-foreground">
@@ -92,6 +92,27 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
                 <li>
                   <Link href="/login" className="hover:text-foreground">
                     Get started
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="mb-3 text-sm font-medium">Legal</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/legal/privacy" className="hover:text-foreground">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/terms" className="hover:text-foreground">
+                    Terms
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/refund" className="hover:text-foreground">
+                    Refunds
                   </Link>
                 </li>
               </ul>

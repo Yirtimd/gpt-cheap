@@ -1,0 +1,58 @@
+---
+title: "Introducing ChatGPT.cheap — AEO monitoring for the rest of us"
+description: "Why we built an AEO monitoring tool for freelancers, solo founders, and SMBs priced at $9/mo."
+date: "2026-04-20"
+---
+
+Every enterprise AEO tool starts at $500/month. Profound, Peec, AthenaHQ — all great products, all built for teams with budget to match.
+
+But the freelancer launching a Notion template, the solo founder shipping a micro-SaaS, the blogger with a personal brand — they are also invisible to ChatGPT, and they also lose deals because of it. The top-down pricing model simply does not serve them.
+
+## What we built
+
+ChatGPT.cheap is AEO monitoring at **$9/month**, designed from the ground up to work at SMB economics:
+
+- **Web-search mode on every call.** Your brand is new — it will not be in the model's training data. We use the Responses API with `web_search` tool on OpenAI and Google Search grounding on Gemini, so every query hits live web content.
+- **Two providers (ChatGPT + Gemini) cover 80% of the AI-assistant market.** Claude and Perplexity are next on the roadmap.
+- **Separate LLM-based judge.** Every provider response is parsed by a second LLM call (`gpt-4o-mini` with structured output) to extract mention, sentiment, position, and competitors. More reliable than regex, still cheap enough to fit in the budget.
+- **No free tier.** This is a controversial choice. We need every user to contribute to real LLM costs on day one. The economics only work if every signup converts.
+
+## How the pipeline works
+
+Every run is a fan-out job:
+
+1. For each of your 5 queries, call **OpenAI** with web search.
+2. For each of your 5 queries, call **Gemini** with grounding.
+3. Pass each raw response to the judge → structured mention analysis.
+4. Aggregate with majority vote (1x–3x replication depending on plan).
+5. Compare against the previous run — if your mention rate crossed the 50% threshold up or down, email you.
+
+On Starter ($9/mo), we run this weekly. On Growth ($19) and Pro ($29), daily.
+
+## Real cost per run
+
+Measured on a real brand with 5 queries:
+
+| Provider | Cost per call | Calls per run | Total per run |
+|---|---|---|---|
+| OpenAI (gpt-4o-mini + web search) | ~3¢ | 5 | 15¢ |
+| Gemini (2.5 Flash + grounding) | ~1¢ | 5 | 5¢ |
+| Judge (Gemini Flash) | ~1¢ | 10 | 10¢ |
+| **Total** | | | **~30¢ per run** |
+
+On Starter, 4 runs/month = $1.20 LLM cost. Revenue $9, Stripe fees 56¢, hosting/email 10¢. Net margin ≈ 79%. Sustainable without VC money.
+
+## What's missing (for now)
+
+- Claude + Perplexity providers (roadmap month 2)
+- Chrome extension to test prompts manually (roadmap month 4+)
+- Competitor intelligence beyond name detection
+- CMS integrations, team roles, white-label
+
+Everything above is explicitly out of scope for MVP. Feature bloat kills SMB SaaS margins faster than anything else.
+
+## Get started
+
+Sign up, add 5 queries about your brand, and see your first report within 24 hours.
+
+Starter is $9/month. Cancel anytime.

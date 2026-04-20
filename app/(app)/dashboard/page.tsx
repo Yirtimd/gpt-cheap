@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { type ChartDataPoint, MentionChart } from "@/components/mention-chart";
 import { type ResultRow, ResultsTable } from "@/components/results-table";
@@ -43,13 +44,13 @@ export default async function DashboardPage() {
 
   const queryMap = new Map((queries ?? []).map((q) => [q.id, q]));
 
-  // Stats
+  const hasRuns = (runs?.length ?? 0) > 0;
+
   const totalResults = results?.length ?? 0;
   const mentionedCount = results?.filter((r) => r.mentioned).length ?? 0;
   const mentionRate = totalResults > 0 ? Math.round((mentionedCount / totalResults) * 100) : 0;
   const completedRuns = runs?.filter((r) => r.status === "done") ?? [];
 
-  // Chart data: per-run mention rate
   const chartData: ChartDataPoint[] = completedRuns
     .slice(0, 10)
     .reverse()
@@ -70,7 +71,6 @@ export default async function DashboardPage() {
       };
     });
 
-  // Results table data (latest 20)
   const tableData: ResultRow[] = (results ?? []).slice(0, 20).map((r) => {
     const q = queryMap.get(r.query_id);
     const run = runs?.find((run) => run.id === r.run_id);
@@ -91,49 +91,78 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold">Dashboard</h1>
-
-      <div className="mb-6 grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Mention Rate</CardDescription>
-            <CardTitle className="text-3xl">{mentionRate}%</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">
-              {mentionedCount} / {totalResults} results
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Completed Runs</CardDescription>
-            <CardTitle className="text-3xl">{completedRuns.length}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">
-              {runs?.filter((r) => r.status === "running").length ?? 0} in progress
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Brands</CardDescription>
-            <CardTitle className="text-3xl">{brands.length}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">{brands.map((b) => b.name).join(", ")}</p>
-          </CardContent>
-        </Card>
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{brands.map((b) => b.name).join(", ")}</p>
       </div>
 
-      <div className="mb-6">
-        <MentionChart data={chartData} />
-      </div>
+      {!hasRuns ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-soft text-brand">
+              <Clock className="h-6 w-6" />
+            </div>
+            <div className="max-w-sm">
+              <h2 className="text-base font-medium">No runs yet</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Your first monitoring run will appear here within 24 hours of signup.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="font-mono text-[10px] uppercase tracking-[0.15em]">
+                  Mention rate
+                </CardDescription>
+                <CardTitle className="text-3xl tracking-tight">{mentionRate}%</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  {mentionedCount} / {totalResults} results
+                </p>
+              </CardContent>
+            </Card>
 
-      <ResultsTable results={tableData} />
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="font-mono text-[10px] uppercase tracking-[0.15em]">
+                  Completed runs
+                </CardDescription>
+                <CardTitle className="text-3xl tracking-tight">{completedRuns.length}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  {runs?.filter((r) => r.status === "running").length ?? 0} in progress
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardDescription className="font-mono text-[10px] uppercase tracking-[0.15em]">
+                  Brands
+                </CardDescription>
+                <CardTitle className="text-3xl tracking-tight">{brands.length}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="truncate text-xs text-muted-foreground">
+                  {brands.map((b) => b.name).join(", ")}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mb-6">
+            <MentionChart data={chartData} />
+          </div>
+
+          <ResultsTable results={tableData} />
+        </>
+      )}
     </div>
   );
 }

@@ -37,10 +37,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
           <div className="flex items-center gap-1.5">
             <ThemeToggle />
-            <Link
-              href="/login"
-              className={buttonVariants({ variant: "ghost", size: "sm" })}
-            >
+            <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
               Sign in
             </Link>
             <Link

@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { BillingSection } from "@/components/billing-section";
 import { BrandEditor } from "@/components/brand-editor";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function SettingsPage() {
@@ -34,45 +34,50 @@ export default async function SettingsPage() {
         .order("created_at", { ascending: true })
     : { data: null };
 
+  const plan = profile?.plan ?? "starter";
+  const usageCents = profile?.monthly_cost_cents_used ?? 0;
+
   return (
-    <div>
-      <h1 className="mb-6 text-2xl font-semibold">Settings</h1>
-
-      <div className="grid gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>Your account details</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2 text-sm">
-            <div>
-              <span className="font-medium">Email:</span> {user.email}
-            </div>
-            <div>
-              <span className="font-medium">Plan:</span>{" "}
-              <span className="capitalize">{profile?.plan ?? "starter"}</span>
-            </div>
-            <div>
-              <span className="font-medium">Usage this period:</span>{" "}
-              {profile?.monthly_cost_cents_used ?? 0}¢
-            </div>
-          </CardContent>
-        </Card>
-
-        {brand && (
-          <>
-            <Separator />
-            <BrandEditor brand={brand} queries={queries ?? []} />
-          </>
-        )}
-
-        <Separator />
-
-        <BillingSection
-          currentPlan={profile?.plan ?? "starter"}
-          hasStripeCustomer={!!profile?.stripe_customer_id}
-        />
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage your account, brand, and billing.
+        </p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Account</CardTitle>
+          <CardDescription>Your account details.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 sm:grid-cols-3">
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Email
+            </p>
+            <p className="mt-1 truncate text-sm">{user.email}</p>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Plan
+            </p>
+            <div className="mt-1">
+              <Badge className="bg-brand capitalize text-brand-foreground">{plan}</Badge>
+            </div>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground">
+              Usage this period
+            </p>
+            <p className="mt-1 font-mono text-sm">{usageCents}¢</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {brand && <BrandEditor brand={brand} queries={queries ?? []} />}
+
+      <BillingSection currentPlan={plan} hasStripeCustomer={!!profile?.stripe_customer_id} />
     </div>
   );
 }

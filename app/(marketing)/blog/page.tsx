@@ -20,17 +20,11 @@ export default async function BlogIndexPage() {
           <p className="text-sm text-muted-foreground">No posts yet.</p>
         ) : (
           posts.map((post) => (
-            <Link
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="group block border-b py-6"
-            >
+            <Link key={post.slug} href={`/blog/${post.slug}`} className="group block border-b py-6">
               <h2 className="text-xl font-semibold tracking-[-0.01em] group-hover:text-brand">
                 {post.title}
               </h2>
-              <p className="mt-1.5 text-sm text-muted-foreground text-pretty">
-                {post.description}
-              </p>
+              <p className="mt-1.5 text-sm text-muted-foreground text-pretty">{post.description}</p>
               <div className="mt-2.5 flex gap-2.5 text-xs text-muted-foreground">
                 <time dateTime={post.date}>
                   {new Date(post.date).toLocaleDateString("en-US", {

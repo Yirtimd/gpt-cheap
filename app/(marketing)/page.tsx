@@ -56,10 +56,7 @@ export default async function LandingPage() {
       {/* HERO */}
       <section className="relative overflow-hidden px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
         <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden hero-glow" />
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 dot-grid opacity-70"
-        />
+        <div aria-hidden className="absolute inset-0 -z-10 dot-grid opacity-70" />
 
         <div className="mx-auto max-w-[68rem]">
           <div className="mx-auto max-w-3xl text-center">

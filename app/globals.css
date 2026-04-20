@@ -235,4 +235,24 @@
     left: -100px;
     background: color-mix(in oklch, var(--brand) 12%, transparent);
   }
+
+  .quote {
+    border-left: 3px solid var(--brand);
+    background: color-mix(in oklch, var(--brand-soft) 60%, transparent);
+    padding: 0.625rem 0.875rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    color: var(--foreground);
+  }
+
+  .wordmark-cheap {
+    background: linear-gradient(
+      110deg,
+      var(--brand),
+      color-mix(in oklch, var(--brand) 65%, var(--foreground))
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+  }
 }

@@ -24,10 +24,7 @@ export function DashboardPreview() {
             { l: "COMPLETED RUNS", v: "12", s: "1 in progress" },
             { l: "BRANDS", v: "1", s: "acme.com" },
           ].map((k) => (
-            <div
-              key={k.l}
-              className="rounded-xl border bg-muted/40 p-4"
-            >
+            <div key={k.l} className="rounded-xl border bg-muted/40 p-4">
               <div className="font-mono text-[10px] tracking-[0.1em] text-muted-foreground">
                 {k.l}
               </div>

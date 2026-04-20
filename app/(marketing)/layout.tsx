@@ -1,41 +1,55 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
+
+function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`font-semibold tracking-[-0.02em] ${className}`}>
+      ChatGPT<span className="text-brand">.cheap</span>
+    </span>
+  );
+}
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand/70 text-[11px] font-bold text-brand-foreground shadow-sm">
-              c
-            </div>
-            <span className="font-semibold tracking-tight">ChatGPT.cheap</span>
-          </Link>
+        <div className="mx-auto flex h-14 max-w-[75rem] items-center justify-between px-6">
+          <div className="flex items-center gap-8">
+            <Link href="/">
+              <Wordmark className="text-[15px]" />
+            </Link>
+            <nav className="hidden items-center gap-6 text-[13px] text-muted-foreground sm:flex">
+              <Link href="/#features" className="hover:text-foreground">
+                Features
+              </Link>
+              <Link href="/#pricing" className="hover:text-foreground">
+                Pricing
+              </Link>
+              <Link href="/#faq" className="hover:text-foreground">
+                FAQ
+              </Link>
+              <Link href="/blog" className="hover:text-foreground">
+                Blog
+              </Link>
+            </nav>
+          </div>
 
-          <nav className="hidden items-center gap-7 text-sm sm:flex">
-            <Link href="/#features" className="text-muted-foreground hover:text-foreground">
-              Features
-            </Link>
-            <Link href="/#pricing" className="text-muted-foreground hover:text-foreground">
-              Pricing
-            </Link>
-            <Link href="/#faq" className="text-muted-foreground hover:text-foreground">
-              FAQ
-            </Link>
-            <Link href="/blog" className="text-muted-foreground hover:text-foreground">
-              Blog
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle />
             <Link
               href="/login"
-              className="hidden text-sm text-muted-foreground hover:text-foreground sm:block"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
             >
               Sign in
             </Link>
-            <Link href="/login" className={buttonVariants({ size: "sm" })}>
+            <Link
+              href="/login"
+              className={buttonVariants({
+                size: "sm",
+                className: "bg-brand text-brand-foreground hover:bg-brand/90",
+              })}
+            >
               Start monitoring
             </Link>
           </div>
@@ -44,87 +58,76 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
 
       <main className="flex-1">{children}</main>
 
-      <footer className="border-t bg-muted/20">
-        <div className="mx-auto max-w-6xl px-6 py-12">
-          <div className="grid gap-10 lg:grid-cols-5">
-            <div className="lg:col-span-2">
-              <Link href="/" className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand to-brand/70 text-[11px] font-bold text-brand-foreground">
-                  c
-                </div>
-                <span className="font-semibold tracking-tight">ChatGPT.cheap</span>
+      <footer className="mt-16 border-t px-6 pt-12 pb-6">
+        <div className="mx-auto max-w-[75rem]">
+          <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div>
+              <Link href="/">
+                <Wordmark className="text-base" />
               </Link>
-              <p className="mt-4 max-w-sm text-sm text-muted-foreground">
-                AEO monitoring for freelancers, solo founders, and SMBs. Track how your brand
-                appears in ChatGPT and Gemini answers — from $9/month.
+              <p className="mt-3 max-w-sm text-[13px] text-muted-foreground">
+                AEO monitoring for solo founders and small teams. From $9/month.
               </p>
             </div>
 
-            <div>
-              <p className="mb-3 text-sm font-medium">Product</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/#features" className="hover:text-foreground">
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/#pricing" className="hover:text-foreground">
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/blog" className="hover:text-foreground">
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            <FooterColumn
+              heading="Product"
+              items={[
+                { label: "Features", href: "/#features" },
+                { label: "Pricing", href: "/#pricing" },
+                { label: "FAQ", href: "/#faq" },
+                { label: "Blog", href: "/blog" },
+              ]}
+            />
 
-            <div>
-              <p className="mb-3 text-sm font-medium">Account</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/login" className="hover:text-foreground">
-                    Sign in
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-foreground">
-                    Get started
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            <FooterColumn
+              heading="Account"
+              items={[
+                { label: "Sign in", href: "/login" },
+                { label: "Get started", href: "/login" },
+              ]}
+            />
 
-            <div>
-              <p className="mb-3 text-sm font-medium">Legal</p>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <Link href="/legal/privacy" className="hover:text-foreground">
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/legal/terms" className="hover:text-foreground">
-                    Terms
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/legal/refund" className="hover:text-foreground">
-                    Refunds
-                  </Link>
-                </li>
-              </ul>
-            </div>
+            <FooterColumn
+              heading="Legal"
+              items={[
+                { label: "Privacy", href: "/legal/privacy" },
+                { label: "Terms", href: "/legal/terms" },
+                { label: "Refund policy", href: "/legal/refund" },
+              ]}
+            />
           </div>
 
-          <div className="mt-12 flex flex-col justify-between gap-2 border-t pt-6 text-xs text-muted-foreground sm:flex-row">
-            <p>© {new Date().getFullYear()} ChatGPT.cheap</p>
-            <p>AEO monitoring for SMB · Built with Next.js, Supabase, OpenAI, Gemini</p>
+          <div className="mt-10 border-t pt-5 text-xs text-muted-foreground">
+            © {new Date().getFullYear()} ChatGPT.cheap · Not affiliated with OpenAI.
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function FooterColumn({
+  heading,
+  items,
+}: {
+  heading: string;
+  items: Array<{ label: string; href: string }>;
+}) {
+  return (
+    <div>
+      <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+        {heading}
+      </p>
+      <ul className="space-y-2 text-[13px]">
+        {items.map((it) => (
+          <li key={it.label}>
+            <Link href={it.href} className="hover:text-foreground">
+              {it.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

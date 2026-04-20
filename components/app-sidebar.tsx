@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import type { Plan } from "@/lib/db/types";
@@ -75,9 +76,17 @@ export function AppSidebar({ user, plan, brands }: Props) {
       <div className="mt-auto">
         <Separator className="mb-4" />
         <p className="mb-2 truncate px-3 text-xs text-muted-foreground">{user.email}</p>
-        <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleSignOut}>
-          Sign out
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 justify-start"
+            onClick={handleSignOut}
+          >
+            Sign out
+          </Button>
+          <ThemeToggle />
+        </div>
       </div>
     </aside>
   );

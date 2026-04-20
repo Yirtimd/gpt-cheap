@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
@@ -17,7 +18,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
-const STEPS = ["Brand Info", "Queries", "Finish"] as const;
+const STEP_TITLES = ["Your Brand", "Monitoring Queries", "All Set"] as const;
+const STEP_DESCS = [
+  "Tell us about the brand you want to monitor.",
+  "What should ChatGPT and Gemini be asked about your brand?",
+  "Review and start monitoring.",
+] as const;
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -92,27 +98,27 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Card className="w-full max-w-lg">
-        <CardHeader>
-          <div className="mb-2 flex gap-2">
-            {STEPS.map((label, i) => (
+    <div className="flex min-h-[60vh] items-start justify-center bg-muted/30 px-4 py-10">
+      <Card className="w-full max-w-[36rem] p-0">
+        <div className="px-6 pt-5">
+          <div className="flex gap-1">
+            {STEP_TITLES.map((label, i) => (
               <div
                 key={label}
-                className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`}
+                className={`h-1 flex-1 rounded-full ${i <= step ? "bg-brand" : "bg-muted"}`}
               />
             ))}
           </div>
-          <CardTitle>
-            {step === 0 && "Your Brand"}
-            {step === 1 && "Monitoring Queries"}
-            {step === 2 && "All Set"}
+          <div className="mt-2 flex justify-between font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+            <span>Step {step + 1} of 3</span>
+            <span>{STEP_TITLES[step]}</span>
+          </div>
+        </div>
+        <CardHeader className="gap-1.5 pt-4">
+          <CardTitle className="text-[1.375rem] font-semibold tracking-tight">
+            {STEP_TITLES[step]}
           </CardTitle>
-          <CardDescription>
-            {step === 0 && "Tell us about the brand you want to monitor."}
-            {step === 1 && "What should ChatGPT and Gemini be asked about your brand?"}
-            {step === 2 && "Review and start monitoring."}
-          </CardDescription>
+          <CardDescription>{STEP_DESCS[step]}</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -170,51 +176,90 @@ export default function OnboardingPage() {
           )}
 
           {step === 2 && (
-            <div className="grid gap-3 text-sm">
-              <div>
-                <span className="font-medium">Brand:</span> {brandName}
-                {brandDomain && <span className="text-muted-foreground"> ({brandDomain})</span>}
-              </div>
-              <div>
-                <span className="font-medium">Queries:</span>{" "}
-                {queries.filter((q) => q.trim().length > 0).length} configured
-              </div>
-              <div>
-                <span className="font-medium">Plan:</span> Starter ($9/mo) — you can upgrade in
-                Settings after setup.
+            <div className="grid gap-3">
+              <div className="rounded-lg border bg-muted/50 p-4 text-sm">
+                <div className="grid gap-2.5">
+                  <Row label="Brand">
+                    <span className="font-medium">
+                      {brandName || "—"}
+                      {brandDomain && (
+                        <span className="text-muted-foreground"> ({brandDomain})</span>
+                      )}
+                    </span>
+                  </Row>
+                  <Row label="Queries">
+                    <span className="font-medium">
+                      {queries.filter((q) => q.trim().length > 0).length} configured
+                    </span>
+                  </Row>
+                  <Row label="Plan">
+                    <span className="font-medium">Starter ($9/mo)</span>
+                  </Row>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">
+                You can upgrade in Settings after setup.
+              </p>
+              <div className="rounded-lg bg-brand-soft px-3 py-3 text-[13px] text-brand">
                 Your first monitoring run will start within 24 hours. Billing will be activated once
                 Stripe is connected.
-              </p>
+              </div>
             </div>
           )}
 
-          {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+          {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         </CardContent>
 
-        <CardFooter className="flex justify-between">
+        <CardFooter className="justify-between">
           {step > 0 ? (
-            <Button variant="ghost" onClick={() => setStep(step - 1)} disabled={loading}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setStep(step - 1)}
+              disabled={loading}
+              className="gap-1.5"
+            >
+              <ChevronLeft className="size-3.5" />
               Back
             </Button>
           ) : (
-            <div />
+            <Button variant="ghost" size="sm" disabled className="gap-1.5">
+              <ChevronLeft className="size-3.5" />
+              Back
+            </Button>
           )}
           {step < 2 ? (
             <Button
+              size="sm"
               onClick={() => setStep(step + 1)}
               disabled={step === 0 && brandName.trim().length === 0}
+              className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand/90"
             >
               Continue
+              <ArrowRight className="size-3.5" />
             </Button>
           ) : (
-            <Button onClick={handleFinish} disabled={loading}>
-              {loading ? "Saving..." : "Start monitoring"}
+            <Button
+              size="sm"
+              onClick={handleFinish}
+              disabled={loading}
+              className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand/90"
+            >
+              {loading ? "Saving…" : "Start monitoring"}
+              <ArrowRight className="size-3.5" />
             </Button>
           )}
         </CardFooter>
       </Card>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-muted-foreground">{label}</span>
+      {children}
     </div>
   );
 }

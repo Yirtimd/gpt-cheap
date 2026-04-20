@@ -7,8 +7,10 @@ import { FaqAccordion } from "@/components/marketing/faq-accordion";
 import { FeaturesGrid } from "@/components/marketing/features-grid";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { PricingCards } from "@/components/marketing/pricing-cards";
+import { StatsBand } from "@/components/marketing/stats-band";
 import { buttonVariants } from "@/components/ui/button";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "ChatGPT.cheap — AEO monitoring for SMB from $9/mo",
@@ -52,84 +54,80 @@ export default async function LandingPage() {
       />
 
       {/* HERO */}
-      <section className="relative overflow-hidden pt-20 pb-20 sm:pt-28 sm:pb-24">
+      <section className="relative overflow-hidden px-6 pt-20 pb-16 sm:pt-28 sm:pb-20">
+        <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden hero-glow" />
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 bg-dot-grid-faint opacity-40 mask-radial-fade"
-        />
-        <div
-          aria-hidden
-          className="absolute top-0 left-1/2 -z-10 h-[400px] w-[800px] -translate-x-1/2 rounded-full bg-brand/20 blur-[100px]"
+          className="absolute inset-0 -z-10 dot-grid opacity-70"
         />
 
-        <div className="mx-auto max-w-6xl px-6">
+        <div className="mx-auto max-w-[68rem]">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand-soft px-3.5 py-1.5 text-xs font-medium text-brand">
-              <Sparkles className="h-3.5 w-3.5" />
-              AEO monitoring from $9/month
+            <div className="mb-6 inline-flex justify-center">
+              <span className="pill-brand">
+                <Sparkles className="size-3.5" />
+                AEO monitoring from $9/month
+              </span>
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+            <h1 className="h1-hero">
               Know when ChatGPT
               <br />
-              <span className="bg-gradient-to-r from-brand to-brand/70 bg-clip-text text-transparent">
-                recommends your brand.
-              </span>
+              <span className="brand-gradient">recommends your brand.</span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              Weekly reports on how ChatGPT and Gemini answer when someone asks about your market.
-              Built for solo founders, freelancers, and small teams.
+            <p className="lead-text mx-auto mt-5 max-w-xl">
+              Weekly reports on how ChatGPT and Gemini answer questions about your market — built
+              for solo founders, freelancers, and small teams.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/login"
-                className={buttonVariants({ size: "lg", className: "gap-2 px-6" })}
+                className={buttonVariants({
+                  size: "lg",
+                  className:
+                    "h-11 gap-2 bg-brand px-6 text-[0.95rem] text-brand-foreground hover:bg-brand/90",
+                })}
               >
                 Start monitoring
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="size-4" />
               </Link>
               <Link
                 href="#pricing"
-                className={buttonVariants({ size: "lg", variant: "outline", className: "px-6" })}
+                className={buttonVariants({
+                  size: "lg",
+                  variant: "outline",
+                  className: "h-11 px-6 text-[0.95rem]",
+                })}
               >
                 See pricing
               </Link>
             </div>
 
-            <p className="mt-5 text-xs text-muted-foreground">
+            <p className="mt-4 text-xs text-muted-foreground">
               No free tier · Monthly billing · Cancel anytime
             </p>
           </div>
 
-          <div className="mx-auto mt-20 max-w-4xl">
+          <div className="mt-16">
             <DashboardPreview />
           </div>
         </div>
       </section>
 
-      {/* STATS BAND */}
-      <section className="border-y bg-muted/30">
-        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-4">
-          <Stat value="79%" label="net margin on Starter" />
-          <Stat value="2¢" label="per provider call" />
-          <Stat value="2" label="AI providers out of the box" />
-          <Stat value="~14m" label="avg run duration" />
-        </div>
-      </section>
+      {/* STATS */}
+      <StatsBand />
 
       {/* FEATURES */}
-      <section id="features" className="py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 max-w-2xl">
-            <div className="mb-4 text-sm font-medium text-brand">Features</div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Built for the long tail of AEO
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Enterprise tools solve the same problem at 50× the price. We cut everything that is
-              not essential to keep pricing at SMB budget.
+      <section id="features" className="px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-[68rem]">
+          <div className="mx-auto mb-14 max-w-2xl text-center">
+            <div className="eyebrow mb-3">Features</div>
+            <h2 className="h2-section">Built for the long tail of AEO</h2>
+            <p className="lead-text mt-4">
+              Everything a solo founder or mini-agency needs to track their brand in AI answers.
+              Nothing a Fortune 500 would bill you $2,000/mo for.
             </p>
           </div>
           <FeaturesGrid />
@@ -137,86 +135,74 @@ export default async function LandingPage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section className="border-t bg-muted/30 py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 max-w-2xl">
-            <div className="mb-4 text-sm font-medium text-brand">How it works</div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              From signup to first report in 24 hours
-            </h2>
+      <section className="border-t bg-muted/40 px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-[60rem]">
+          <div className="mb-12 text-center">
+            <div className="eyebrow mb-3">How it works</div>
+            <h2 className="h2-section">From signup to first report in 24 hours</h2>
           </div>
           <HowItWorks />
         </div>
       </section>
 
       {/* PRICING */}
-      <section id="pricing" className="py-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-14 text-center">
-            <div className="mb-4 text-sm font-medium text-brand">Pricing</div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Simple plans, no surprises
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-              Monthly billing. No annual lock-in. No hidden per-seat fees.
-            </p>
+      <section id="pricing" className="px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-[68rem]">
+          <div className="mx-auto mb-14 max-w-xl text-center">
+            <div className="eyebrow mb-3">Pricing</div>
+            <h2 className="h2-section">Simple monthly pricing</h2>
+            <p className="lead-text mt-4">No free tier. No annual tricks. Cancel anytime.</p>
           </div>
           <PricingCards />
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="border-t bg-muted/30 py-24">
-        <div className="mx-auto max-w-2xl px-6">
-          <div className="mb-12 text-center">
-            <div className="mb-4 text-sm font-medium text-brand">FAQ</div>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Questions, answered</h2>
+      <section id="faq" className="border-t bg-muted/40 px-6 py-24 sm:py-28">
+        <div className="mx-auto max-w-[48rem]">
+          <div className="mb-10 text-center">
+            <div className="eyebrow mb-3">FAQ</div>
+            <h2 className="h2-section">Good questions, short answers</h2>
           </div>
           <FaqAccordion />
         </div>
       </section>
 
       {/* CTA */}
-      <section className="relative overflow-hidden border-t py-24">
+      <section className="px-6 py-10 sm:py-14">
         <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-soft via-background to-background"
-        />
-        <div
-          aria-hidden
-          className="absolute -bottom-20 left-1/2 -z-10 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-brand/20 blur-[80px]"
-        />
-
-        <div className="mx-auto max-w-2xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            See where your brand stands in AI answers
-          </h2>
-          <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-            First report in 24 hours. $9/month. Cancel anytime.
-          </p>
+          className={cn(
+            "relative mx-auto max-w-6xl overflow-hidden rounded-3xl border px-6 py-16 text-center",
+            "border-brand/20",
+          )}
+          style={{
+            background:
+              "linear-gradient(135deg, var(--brand-soft) 0%, color-mix(in oklch, var(--brand-soft) 30%, var(--background)) 100%)",
+          }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                "radial-gradient(500px circle at 30% 40%, color-mix(in oklch, var(--brand) 30%, transparent), transparent 60%)",
+            }}
+          />
+          <h2 className="h2-section">See where your brand stands in AI answers.</h2>
+          <p className="lead-text mt-4">First report in 24 hours. $9/month. Cancel anytime.</p>
           <Link
             href="/login"
             className={buttonVariants({
               size: "lg",
-              className: "mt-8 gap-2 px-8",
+              className:
+                "mt-8 h-11 gap-2 bg-brand px-6 text-[0.95rem] text-brand-foreground hover:bg-brand/90",
             })}
           >
             Get started
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="size-4" />
           </Link>
         </div>
       </section>
     </>
-  );
-}
-
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-center">
-      <div className="bg-gradient-to-b from-foreground to-foreground/70 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl">
-        {value}
-      </div>
-      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-    </div>
   );
 }

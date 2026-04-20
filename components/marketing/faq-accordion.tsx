@@ -9,28 +9,32 @@ import {
 
 const ITEMS = [
   {
-    q: "How is this different from Profound, Peec, or AthenaHQ?",
-    a: "Those tools target enterprise with $500+/mo pricing. We serve the long tail — freelancers, solo founders, and SMBs who need AEO monitoring without an enterprise budget.",
+    q: "Why is this cheaper than Profound or Peec?",
+    a: "Because we are not trying to sell to enterprise. We run a lean crawler on two providers, charge a flat monthly price, and skip the sales calls. The same core signal — where your brand shows up in AI answers — for an SMB budget.",
   },
   {
-    q: "Which AI providers do you monitor?",
-    a: "OpenAI (ChatGPT via Responses API) and Google Gemini, both with web search enabled. Claude and Perplexity are on the roadmap.",
+    q: "How do you query ChatGPT — API or web?",
+    a: "We use the official APIs with web search enabled, so the answers reflect what an actual user would see when asking a live question. No cached results, no scraping the UI.",
   },
   {
-    q: "How accurate is the mention detection?",
-    a: "We use a separate LLM-based judge with structured output for every response, with 1x–3x replication depending on your plan. Majority voting reduces false positives compared to regex matching.",
+    q: "How often will I get alerts?",
+    a: "Only when something meaningful changes — mention rate drops, a new competitor appears, or your position shifts. No daily nag emails.",
+  },
+  {
+    q: "What about Claude or Perplexity?",
+    a: "Roadmap, not MVP. We are focused on ChatGPT and Gemini, which cover the overwhelming majority of consumer AI answers today.",
   },
   {
     q: "Can I cancel anytime?",
-    a: "Yes — monthly billing, cancel or downgrade anytime via the customer portal. No annual lock-in, no hidden fees.",
+    a: "Yes. Monthly billing, cancel from Settings, no phone calls or retention offers.",
   },
   {
-    q: "How often are runs executed?",
-    a: "Starter runs weekly. Growth and Pro run daily. Each run tests all your active queries across both providers.",
+    q: "Do you offer a free trial?",
+    a: "No. We run real provider calls that cost money — giving away free trials would blow up our margins. Starter at $9/month is the cheapest real AEO monitoring you can buy.",
   },
   {
-    q: "Do you support custom prompts or only pre-set ones?",
-    a: "You write the exact prompts yourself. We recommend 3–5 well-crafted queries that match real customer intent — we will help you calibrate after the first week.",
+    q: "Can I monitor more than one brand?",
+    a: "Yes, on the Pro plan you can monitor up to 3 brands with 30 queries split across them.",
   },
 ];
 

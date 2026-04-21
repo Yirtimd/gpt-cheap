@@ -36,11 +36,15 @@ export const PLANS: Record<Plan, PlanConfig> = {
   },
 };
 
-const PREDICTED_CENTS_PER_CALL: Record<Provider, number> = {
+// Projected cost of one query = provider call + judge call.
+// Judge runs on gemini-2.5-flash for every non-stub provider result,
+// so the cap check must include it or we systematically undercount.
+const PREDICTED_PROVIDER_CENTS: Record<Provider, number> = {
   openai: 3,
   gemini: 1,
 };
+const PREDICTED_JUDGE_CENTS = 1;
 
 export function predictCostCents(provider: Provider): number {
-  return PREDICTED_CENTS_PER_CALL[provider];
+  return PREDICTED_PROVIDER_CENTS[provider] + PREDICTED_JUDGE_CENTS;
 }

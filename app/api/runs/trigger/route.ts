@@ -1,9 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  getActiveRunForBrand,
-  getLastManualRunForUser,
-  userHasAnyRun,
-} from "@/lib/db/queries";
+import { getActiveRunForBrand, getLastManualRunForUser, userHasAnyRun } from "@/lib/db/queries";
 import { triggerBrandRun } from "@/lib/pipeline/trigger-run";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";

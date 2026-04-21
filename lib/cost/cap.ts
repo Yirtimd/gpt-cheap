@@ -1,9 +1,12 @@
 import "server-only";
-import type { Provider } from "@/lib/db/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database, Provider } from "@/lib/db/types";
 import { env } from "@/lib/env";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { PLANS, predictCostCents } from "./plans";
+
+const BILLING_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 export type CapCheckResult =
   | { ok: true; remainingCents: number }
@@ -13,6 +16,27 @@ export type CapCheckResult =
       usedCents?: number;
       capCents?: number;
     };
+
+// Conditional reset: only fires if billing_period_start is older than 30 days.
+// Race-safe — concurrent callers either see a stale row and update, or see a
+// fresh row (because Postgres re-evaluates WHERE after the first UPDATE) and
+// no-op. Covers accounts that never went through Stripe (dev/test users) and
+// Stripe `invoice.paid` webhooks that silently failed.
+async function maybeResetBillingPeriod(
+  db: SupabaseClient<Database>,
+  userId: string,
+): Promise<void> {
+  const now = new Date();
+  const threshold = new Date(now.getTime() - BILLING_PERIOD_MS);
+  await db
+    .from("profiles")
+    .update({
+      monthly_cost_cents_used: 0,
+      billing_period_start: now.toISOString(),
+    })
+    .eq("id", userId)
+    .lt("billing_period_start", threshold.toISOString());
+}
 
 export async function checkGlobalCap(): Promise<
   { ok: true } | { ok: false; spentCents: number; capCents: number }
@@ -63,6 +87,9 @@ export async function checkUserCap(params: {
   }
 
   const supabase = createSupabaseAdminClient();
+
+  await maybeResetBillingPeriod(supabase, userId);
+
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("plan, monthly_cost_cents_used")

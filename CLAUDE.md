@@ -307,9 +307,11 @@ interface LLMProvider {
 
 ### Cost controls
 - Default LLM: `gpt-4o-mini` и `gemini-2.5-flash`. Премиум-модели запрещены на Starter
-- Daily cap per user: `monthly_cost_cents_used + predicted_cost > plan.limit` → abort + email
+- Monthly cap per user: `monthly_cost_cents_used + predicted_cost > plan.limit` → abort + email
+- `predicted_cost = provider_call + judge_call` — судья добавляет вторую LLM-операцию на каждый result, cap-check обязан её учитывать
 - Global cap в env (`MAX_GLOBAL_COST_CENTS_PER_DAY`), при превышении Inngest приостанавливает cron
 - Прогнозная стоимость рассчитывается до вызова, не после
+- Billing period rollover: Stripe webhooks (`checkout`, `subscription.updated`, `invoice.paid`) ставят `billing_period_start` из реального Stripe-периода. **Lazy-reset** в `checkUserCap`: если `billing_period_start` старше 30 дней — обнуляем счётчик. Покрывает dev-юзеров без Stripe и пропущенные webhooks.
 
 ### Коммуникация
 - Общение и документация на русском

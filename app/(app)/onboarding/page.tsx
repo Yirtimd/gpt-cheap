@@ -89,6 +89,20 @@ export default function OnboardingPage() {
       posthog?.capture("brand_created", { brandName: brandName.trim() });
       posthog?.capture("queries_created", { count: activeQueries.length });
 
+      // Kick off the first monitoring run immediately so the user lands on
+      // a dashboard with "Run in progress" instead of an empty state.
+      // The /api/runs/trigger endpoint detects zero prior runs and
+      // switches to source=onboarding, bypassing the manual 24h cooldown.
+      try {
+        await fetch("/api/runs/trigger", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ brandId: brand.id }),
+        });
+      } catch {
+        // First-run failure is non-fatal — the weekly cron will pick it up.
+      }
+
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
@@ -201,8 +215,8 @@ export default function OnboardingPage() {
                 You can upgrade in Settings after setup.
               </p>
               <div className="rounded-lg bg-brand-soft px-3 py-3 text-[13px] text-brand">
-                Your first monitoring run will start within 24 hours. Billing will be activated once
-                Stripe is connected.
+                Your first monitoring run starts right after you click below and takes a couple of
+                minutes. Billing will be activated once Stripe is connected.
               </div>
             </div>
           )}

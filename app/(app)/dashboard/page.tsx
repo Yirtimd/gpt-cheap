@@ -2,8 +2,11 @@ import { Clock } from "lucide-react";
 import { redirect } from "next/navigation";
 import { type ChartDataPoint, MentionChart } from "@/components/mention-chart";
 import { type ResultRow, ResultsTable } from "@/components/results-table";
+import { RunNowButton } from "@/components/run-now-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+const MANUAL_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
@@ -22,10 +25,17 @@ export default async function DashboardPage() {
 
   const { data: runs } = await supabase
     .from("runs")
-    .select("id, status, total_cost_cents, completed_at, brand_id, created_at")
+    .select("id, status, total_cost_cents, completed_at, brand_id, created_at, triggered_by")
     .in("brand_id", brandIds)
     .order("created_at", { ascending: false })
     .limit(20);
+
+  const activeRun = (runs ?? []).some((r) => r.status === "pending" || r.status === "running");
+  const lastManualRun = (runs ?? []).find((r) => r.triggered_by === "manual");
+  const cooldownUntil = lastManualRun
+    ? new Date(new Date(lastManualRun.created_at).getTime() + MANUAL_COOLDOWN_MS).toISOString()
+    : null;
+  const primaryBrandId = brands[0]?.id ?? null;
 
   const runIds = (runs ?? []).map((r) => r.id);
 
@@ -91,9 +101,20 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{brands.map((b) => b.name).join(", ")}</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {brands.map((b) => b.name).join(", ")}
+          </p>
+        </div>
+        {primaryBrandId && (
+          <RunNowButton
+            brandId={primaryBrandId}
+            activeRun={activeRun}
+            cooldownUntil={cooldownUntil}
+          />
+        )}
       </div>
 
       {!hasRuns ? (
@@ -105,9 +126,18 @@ export default async function DashboardPage() {
             <div className="max-w-sm">
               <h2 className="text-base font-medium">No runs yet</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Your first monitoring run will appear here within 24 hours of signup.
+                {activeRun
+                  ? "Your first run is in progress. Results will appear here shortly."
+                  : "Kick off your first monitoring run — results take a couple of minutes."}
               </p>
             </div>
+            {primaryBrandId && !activeRun && (
+              <RunNowButton
+                brandId={primaryBrandId}
+                activeRun={activeRun}
+                cooldownUntil={cooldownUntil}
+              />
+            )}
           </CardContent>
         </Card>
       ) : (

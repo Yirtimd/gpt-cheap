@@ -1,13 +1,17 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, RunStatus } from "./types";
+import type { Database, Plan, RunStatus, RunTriggerSource } from "./types";
 
 type AdminClient = SupabaseClient<Database>;
 
-export async function createRun(db: AdminClient, brandId: string) {
+export async function createRun(
+  db: AdminClient,
+  brandId: string,
+  triggeredBy: RunTriggerSource = "cron",
+) {
   const { data, error } = await db
     .from("runs")
-    .insert({ brand_id: brandId, status: "pending" as RunStatus })
+    .insert({ brand_id: brandId, status: "pending" as RunStatus, triggered_by: triggeredBy })
     .select("id")
     .single();
   if (error) throw new Error(`createRun: ${error.message}`);
@@ -103,4 +107,89 @@ export async function getLatestCompletedRun(
     .maybeSingle();
   if (error) throw new Error(`getLatestCompletedRun: ${error.message}`);
   return data;
+}
+
+// Cron helpers ---------------------------------------------------------------
+
+// Returns (userId, brandId) pairs for every active brand whose owner is on
+// one of the given plans. Service-role client only — bypasses RLS.
+export async function getBrandsForPlans(db: AdminClient, plans: Plan[]) {
+  const { data: profiles, error: pErr } = await db
+    .from("profiles")
+    .select("id")
+    .in("plan", plans);
+  if (pErr) throw new Error(`getBrandsForPlans: ${pErr.message}`);
+  if (!profiles || profiles.length === 0) return [];
+
+  const userIds = profiles.map((p) => p.id);
+  const { data: brands, error: bErr } = await db
+    .from("brands")
+    .select("id, user_id")
+    .in("user_id", userIds);
+  if (bErr) throw new Error(`getBrandsForPlans: ${bErr.message}`);
+
+  return (brands ?? []).map((b) => ({ brandId: b.id, userId: b.user_id }));
+}
+
+// Manual-trigger helpers -----------------------------------------------------
+
+// Most recent manual run across every brand owned by this user.
+// Used to enforce the 24h cooldown on the Run-now button.
+export async function getLastManualRunForUser(db: AdminClient, userId: string) {
+  const { data: brands, error: bErr } = await db
+    .from("brands")
+    .select("id")
+    .eq("user_id", userId);
+  if (bErr) throw new Error(`getLastManualRunForUser: ${bErr.message}`);
+  if (!brands || brands.length === 0) return null;
+
+  const { data, error } = await db
+    .from("runs")
+    .select("created_at")
+    .in(
+      "brand_id",
+      brands.map((b) => b.id),
+    )
+    .eq("triggered_by", "manual" as RunTriggerSource)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`getLastManualRunForUser: ${error.message}`);
+  return data;
+}
+
+// A run is "active" if it is pending or running. While any brand has one,
+// the manual button stays disabled to avoid double-spend.
+export async function getActiveRunForBrand(db: AdminClient, brandId: string) {
+  const { data, error } = await db
+    .from("runs")
+    .select("id, status, created_at")
+    .eq("brand_id", brandId)
+    .in("status", ["pending", "running"] as RunStatus[])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(`getActiveRunForBrand: ${error.message}`);
+  return data;
+}
+
+// Existence check used by onboarding to decide whether to skip rate-limit.
+// If the user has zero runs ever, the first trigger is the onboarding run.
+export async function userHasAnyRun(db: AdminClient, userId: string) {
+  const { data: brands, error: bErr } = await db
+    .from("brands")
+    .select("id")
+    .eq("user_id", userId);
+  if (bErr) throw new Error(`userHasAnyRun: ${bErr.message}`);
+  if (!brands || brands.length === 0) return false;
+
+  const { count, error } = await db
+    .from("runs")
+    .select("id", { count: "exact", head: true })
+    .in(
+      "brand_id",
+      brands.map((b) => b.id),
+    );
+  if (error) throw new Error(`userHasAnyRun: ${error.message}`);
+  return (count ?? 0) > 0;
 }

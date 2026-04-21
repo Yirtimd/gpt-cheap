@@ -1,9 +1,11 @@
 import { eventType, Inngest, staticSchema } from "inngest";
+import type { RunTriggerSource } from "@/lib/db/types";
 
 export const brandScheduled = eventType("run/brand.scheduled", {
   schema: staticSchema<{
     brandId: string;
     userId: string;
+    source: RunTriggerSource;
   }>(),
 });
 

@@ -114,10 +114,7 @@ export async function getLatestCompletedRun(
 // Returns (userId, brandId) pairs for every active brand whose owner is on
 // one of the given plans. Service-role client only — bypasses RLS.
 export async function getBrandsForPlans(db: AdminClient, plans: Plan[]) {
-  const { data: profiles, error: pErr } = await db
-    .from("profiles")
-    .select("id")
-    .in("plan", plans);
+  const { data: profiles, error: pErr } = await db.from("profiles").select("id").in("plan", plans);
   if (pErr) throw new Error(`getBrandsForPlans: ${pErr.message}`);
   if (!profiles || profiles.length === 0) return [];
 
@@ -136,10 +133,7 @@ export async function getBrandsForPlans(db: AdminClient, plans: Plan[]) {
 // Most recent manual run across every brand owned by this user.
 // Used to enforce the 24h cooldown on the Run-now button.
 export async function getLastManualRunForUser(db: AdminClient, userId: string) {
-  const { data: brands, error: bErr } = await db
-    .from("brands")
-    .select("id")
-    .eq("user_id", userId);
+  const { data: brands, error: bErr } = await db.from("brands").select("id").eq("user_id", userId);
   if (bErr) throw new Error(`getLastManualRunForUser: ${bErr.message}`);
   if (!brands || brands.length === 0) return null;
 
@@ -176,10 +170,7 @@ export async function getActiveRunForBrand(db: AdminClient, brandId: string) {
 // Existence check used by onboarding to decide whether to skip rate-limit.
 // If the user has zero runs ever, the first trigger is the onboarding run.
 export async function userHasAnyRun(db: AdminClient, userId: string) {
-  const { data: brands, error: bErr } = await db
-    .from("brands")
-    .select("id")
-    .eq("user_id", userId);
+  const { data: brands, error: bErr } = await db.from("brands").select("id").eq("user_id", userId);
   if (bErr) throw new Error(`userHasAnyRun: ${bErr.message}`);
   if (!brands || brands.length === 0) return false;
 

@@ -73,11 +73,7 @@ export function RunNowButton({ brandId, activeRun, cooldownUntil }: Props) {
       size="sm"
       className="gap-1.5 bg-brand text-brand-foreground hover:bg-brand/90"
     >
-      {loading ? (
-        <Loader2 className="size-3.5 animate-spin" />
-      ) : (
-        <Play className="size-3.5" />
-      )}
+      {loading ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
       {label}
     </Button>
   );

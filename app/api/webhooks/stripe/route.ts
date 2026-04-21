@@ -46,13 +46,16 @@ export async function POST(request: Request) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         const priceId = subscription.items.data[0]?.price.id;
         const plan = priceId ? planFromPriceId(priceId) : null;
+        const periodStartUnix = subscription.items.data[0]?.current_period_start;
 
         await db
           .from("profiles")
           .update({
             plan: plan ?? "starter",
             stripe_customer_id: customerId,
-            billing_period_start: new Date().toISOString(),
+            billing_period_start: periodStartUnix
+              ? new Date(periodStartUnix * 1000).toISOString()
+              : new Date().toISOString(),
             monthly_cost_cents_used: 0,
           })
           .eq("id", userId);
@@ -87,13 +90,16 @@ export async function POST(request: Request) {
           : subscription.customer?.id;
       const priceId = subscription.items.data[0]?.price.id;
       const plan = priceId ? planFromPriceId(priceId) : null;
+      const periodStartUnix = subscription.items.data[0]?.current_period_start;
 
       if (customerId && plan) {
         await db
           .from("profiles")
           .update({
             plan,
-            billing_period_start: new Date().toISOString(),
+            billing_period_start: periodStartUnix
+              ? new Date(periodStartUnix * 1000).toISOString()
+              : new Date().toISOString(),
             monthly_cost_cents_used: 0,
           })
           .eq("stripe_customer_id", customerId);
@@ -105,12 +111,13 @@ export async function POST(request: Request) {
       const invoice = event.data.object as Stripe.Invoice;
       const customerId =
         typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+      const periodStartUnix = invoice.period_start;
 
       if (customerId) {
         await db
           .from("profiles")
           .update({
-            billing_period_start: new Date().toISOString(),
+            billing_period_start: new Date(periodStartUnix * 1000).toISOString(),
             monthly_cost_cents_used: 0,
           })
           .eq("stripe_customer_id", customerId);

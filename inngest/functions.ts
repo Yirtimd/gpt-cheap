@@ -1,16 +1,18 @@
 import crypto from "node:crypto";
+import { cron } from "inngest";
 import { checkUserCap, incrementUserCost } from "@/lib/cost/cap";
 import { PLANS } from "@/lib/cost/plans";
 import {
   countRunResults,
   createRun,
   getActiveQueries,
+  getBrandsForPlans,
   getBrandWithUser,
   getUserPlan,
   insertResult,
   updateRunStatus,
 } from "@/lib/db/queries";
-import type { Provider } from "@/lib/db/types";
+import type { Plan, Provider, RunTriggerSource } from "@/lib/db/types";
 import { judgeMention } from "@/lib/parsing/mention-judge";
 import { aggregateRun } from "@/lib/pipeline/aggregate";
 import { detectDelta } from "@/lib/pipeline/delta";
@@ -25,7 +27,11 @@ import { brandScheduled, inngest, queryExecute, runCompleted } from "./client";
 const scheduleBrandRun = inngest.createFunction(
   { id: "schedule-brand-run", triggers: [brandScheduled] },
   async ({ event, step }) => {
-    const { brandId, userId } = event.data as { brandId: string; userId: string };
+    const { brandId, userId, source } = event.data as {
+      brandId: string;
+      userId: string;
+      source: RunTriggerSource;
+    };
 
     const db = createSupabaseAdminClient();
 
@@ -38,7 +44,7 @@ const scheduleBrandRun = inngest.createFunction(
     const plan = PLANS[profile.plan];
     const expectedTotal = queries.length * ACTIVE_PROVIDERS.length * plan.replication;
 
-    const run = await step.run("create-run", () => createRun(db, brandId));
+    const run = await step.run("create-run", () => createRun(db, brandId, source));
 
     const events = queries.flatMap((q) =>
       ACTIVE_PROVIDERS.flatMap((provider) =>
@@ -63,7 +69,7 @@ const scheduleBrandRun = inngest.createFunction(
     await step.run("update-status-running", () => updateRunStatus(db, run.id, "running"));
     await step.sendEvent("fan-out", events);
 
-    return { runId: run.id, fanOutCount: events.length };
+    return { runId: run.id, fanOutCount: events.length, source };
   },
 );
 
@@ -91,11 +97,54 @@ const executeQuery = inngest.createFunction(
       expectedTotal: number;
     };
 
+    const idempotencyKey = crypto
+      .createHash("sha256")
+      .update(`${d.runId}|${d.queryId}|${d.provider}|${d.replicationIndex}`)
+      .digest("hex");
+
+    const db = createSupabaseAdminClient();
+
     const capCheck = await step.run("check-cap", () =>
       checkUserCap({ userId: d.userId, provider: d.provider }),
     );
+
+    // Cap reached: persist a skipped row so completion count still reaches
+    // expectedTotal and the run can aggregate/notify instead of hanging.
     if (!capCheck.ok) {
-      console.log(`[execute-query] cap reached for user ${d.userId}: ${capCheck.reason}`);
+      await step.run("save-skipped", () =>
+        insertResult(db, {
+          run_id: d.runId,
+          query_id: d.queryId,
+          provider: d.provider,
+          replication_index: d.replicationIndex,
+          raw_response: `[SKIPPED: ${capCheck.reason}]`,
+          mentioned: false,
+          position: null,
+          sentiment: null,
+          recommendation_strength: null,
+          context_quote: null,
+          citations: [],
+          competitors_mentioned: [],
+          cost_cents: 0,
+          idempotency_key: idempotencyKey,
+        }),
+      );
+
+      const countAfterSkip = await step.run("check-completion-skipped", () =>
+        countRunResults(db, d.runId),
+      );
+      if (countAfterSkip >= d.expectedTotal) {
+        await step.sendEvent("run-completed", {
+          name: "run/completed",
+          data: {
+            runId: d.runId,
+            brandId: d.brandId,
+            brandName: d.brandName,
+            userId: d.userId,
+          },
+        });
+      }
+
       return { skipped: true, reason: capCheck.reason };
     }
 
@@ -127,13 +176,6 @@ const executeQuery = inngest.createFunction(
     });
 
     const totalCostCents = providerResult.costCents + judgeResult.costCents;
-
-    const idempotencyKey = crypto
-      .createHash("sha256")
-      .update(`${d.runId}|${d.queryId}|${d.provider}|${d.replicationIndex}`)
-      .digest("hex");
-
-    const db = createSupabaseAdminClient();
 
     await step.run("save-result", async () => {
       await insertResult(db, {
@@ -219,4 +261,50 @@ const completeRun = inngest.createFunction(
   },
 );
 
-export const functions = [scheduleBrandRun, executeQuery, completeRun];
+// ---------------------------------------------------------------------------
+// Functions 4–5: cron schedulers
+//
+// Starter runs weekly (Mondays 09:00 UTC); Growth and Pro run daily at the
+// same hour. Each scheduler fans out one `brand.scheduled` event per active
+// brand owned by users on the matching plan.
+// ---------------------------------------------------------------------------
+async function gatherScheduledEvents(plans: Plan[]) {
+  const db = createSupabaseAdminClient();
+  const pairs = await getBrandsForPlans(db, plans);
+  return pairs.map(({ brandId, userId }) => ({
+    name: "run/brand.scheduled" as const,
+    data: { brandId, userId, source: "cron" as RunTriggerSource },
+  }));
+}
+
+const scheduleStarterRuns = inngest.createFunction(
+  { id: "schedule-starter-runs", triggers: [cron("0 9 * * 1")] },
+  async ({ step }) => {
+    const events = await step.run("gather-starter-brands", () =>
+      gatherScheduledEvents(["starter"]),
+    );
+    if (events.length === 0) return { scheduled: 0 };
+    await step.sendEvent("fan-out-starter", events);
+    return { scheduled: events.length };
+  },
+);
+
+const scheduleGrowthProRuns = inngest.createFunction(
+  { id: "schedule-growth-pro-runs", triggers: [cron("0 9 * * *")] },
+  async ({ step }) => {
+    const events = await step.run("gather-growth-pro-brands", () =>
+      gatherScheduledEvents(["growth", "pro"]),
+    );
+    if (events.length === 0) return { scheduled: 0 };
+    await step.sendEvent("fan-out-growth-pro", events);
+    return { scheduled: events.length };
+  },
+);
+
+export const functions = [
+  scheduleBrandRun,
+  executeQuery,
+  completeRun,
+  scheduleStarterRuns,
+  scheduleGrowthProRuns,
+];

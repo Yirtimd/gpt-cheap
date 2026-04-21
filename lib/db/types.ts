@@ -1,6 +1,7 @@
 export type Plan = "starter" | "growth" | "pro";
 export type Provider = "openai" | "gemini";
 export type RunStatus = "pending" | "running" | "done" | "failed";
+export type RunTriggerSource = "cron" | "onboarding" | "manual";
 export type Sentiment = "positive" | "neutral" | "negative";
 export type RecommendationStrength = "recommended" | "mentioned" | "dismissed";
 
@@ -17,6 +18,7 @@ export type Database = {
     Enums: {
       plan_tier: Plan;
       run_status: RunStatus;
+      run_trigger_source: RunTriggerSource;
       llm_provider: Provider;
       sentiment: Sentiment;
       recommendation_strength: RecommendationStrength;
@@ -96,6 +98,7 @@ export type Database = {
           scheduled_at: string;
           completed_at: string | null;
           status: RunStatus;
+          triggered_by: RunTriggerSource;
           total_cost_cents: number;
           created_at: string;
         };
@@ -105,6 +108,7 @@ export type Database = {
           scheduled_at?: string;
           completed_at?: string | null;
           status?: RunStatus;
+          triggered_by?: RunTriggerSource;
           total_cost_cents?: number;
           created_at?: string;
         };

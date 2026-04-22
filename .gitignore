@@ -43,3 +43,6 @@ next-env.d.ts
 
 # cowork / claude code session metadata
 .claude/
+
+# local session notes (chat transcripts, not project docs)
+docs/sessions/
